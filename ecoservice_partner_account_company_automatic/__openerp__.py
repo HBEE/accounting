@@ -32,7 +32,9 @@
     "description": """If a partner is created a new debit and credit account will be created automatically.""",
     "init_xml": [],
     "demo_xml": [],
-    "update_xml": [],
+    "update_xml": [
+        'security/ir.model.access.csv',
+    ],
     "active": False,
     "installable": True
 }
