@@ -57,7 +57,8 @@ class ecoservice_partner_auto_account_company(osv.osv):
     def get_accounts(self, cr, uid, partner_id, context=None):
         if context is None:
             context = {}
-        partner_name = self.pool.get('res.partner').read(cr, uid, partner_id, ['name'], context=context)['name']
+        partner_name = self.pool.get('res.partner').browse(
+            cr, uid, partner_id, context).name
         user_company = self.pool.get('res.users').read(cr, uid, uid, ['company_id'])['company_id'][0]
         config_ids = self.search(cr, uid, [('company_id', '=', user_company)])
         account_obj = self.pool.get('account.account')
