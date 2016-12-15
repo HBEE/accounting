@@ -201,8 +201,8 @@ class ecofi(osv.osv):
                 if len(sollnotax) == 1:
                     ecofikonto = sollnotax[0]
         if not ecofikonto:
-            if 'invoice_ids' in context:
-                invoice_ids = context['invoice_ids']
+            if context.get('invoice'):
+                invoice_ids = context['invoice'].ids
             else:
                 invoice_ids = self.pool.get('account.invoice').search(cr, uid, [('move_id', '=', move.id)])
             in_booking = False
