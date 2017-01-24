@@ -163,43 +163,46 @@ class ecofi(osv.osv):
         a. Test if there is an invoice connected to the move_id and test if the invoice
             account_id is in the move than this is the mainaccount
         """
+        def first(set_element):
+            return next(iter(set_element))
+
         context = context or dict()
         ecofikonto = False
-        sollkonto = list()
-        habenkonto = list()
-        nullkonto = list()
+        sollkonto = set()
+        habenkonto = set()
+        nullkonto = set()
         error = False
         ecofikonto_no_invoice = move.line_id[0].account_id
 
         for line in move.line_id:
             Umsatz = Decimal(str(line.debit)) - Decimal(str(line.credit))
             if Umsatz < 0:
-                habenkonto.append(line.account_id)
+                habenkonto.add(line.account_id)
             elif Umsatz > 0:
-                sollkonto.append(line.account_id)
+                sollkonto.add(line.account_id)
             else:
-                nullkonto.append(line.account_id)
+                nullkonto.add(line.account_id)
         if len(sollkonto) == 1 and len(habenkonto) == 1:
             ecofikonto = move.line_id[0].account_id
         elif len(sollkonto) == 1 and len(habenkonto) > 1:
-            ecofikonto = sollkonto[0]
+            ecofikonto = first(sollkonto)
         elif len(sollkonto) > 1 and len(habenkonto) == 1:
-            ecofikonto = habenkonto[0]
+            ecofikonto = first(sollkonto)
         elif len(sollkonto) > 1 and len(habenkonto) > 1:
             if len(sollkonto) > len(habenkonto):
-                habennotax = list()
+                habennotax = set()
                 for haben in habenkonto:
                     if not self.is_taxline(cr, haben.id):
-                        habennotax.append(haben)
+                        habennotax.add(haben)
                 if len(habennotax) == 1:
-                    ecofikonto = habennotax[0]
+                    ecofikonto = first(habennotax)
             elif len(sollkonto) < len(habenkonto):
-                sollnotax = list()
+                sollnotax = set()
                 for soll in sollkonto:
                     if not self.is_taxline(cr, soll.id):
-                        sollnotax.append(soll)
+                        sollnotax.add(soll)
                 if len(sollnotax) == 1:
-                    ecofikonto = sollnotax[0]
+                    ecofikonto = first(sollnotax)
         if not ecofikonto:
             if context.get('invoice'):
                 invoice_ids = context['invoice'].ids
