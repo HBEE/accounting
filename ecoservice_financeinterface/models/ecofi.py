@@ -9,6 +9,7 @@ import base64
 import cStringIO
 import csv
 from decimal import Decimal
+from helpers import OrderedSet
 from openerp.tools import ustr
 from datetime import datetime
 import re
@@ -168,9 +169,9 @@ class ecofi(osv.osv):
 
         context = context or dict()
         ecofikonto = False
-        sollkonto = set()
-        habenkonto = set()
-        nullkonto = set()
+        sollkonto = OrderedSet()
+        habenkonto = OrderedSet()
+        nullkonto = OrderedSet()
         error = False
         ecofikonto_no_invoice = move.line_id[0].account_id
 
@@ -190,14 +191,14 @@ class ecofi(osv.osv):
             ecofikonto = first(sollkonto)
         elif len(sollkonto) > 1 and len(habenkonto) > 1:
             if len(sollkonto) > len(habenkonto):
-                habennotax = set()
+                habennotax = OrderedSet()
                 for haben in habenkonto:
                     if not self.is_taxline(cr, haben.id):
                         habennotax.add(haben)
                 if len(habennotax) == 1:
                     ecofikonto = first(habennotax)
             elif len(sollkonto) < len(habenkonto):
-                sollnotax = set()
+                sollnotax = OrderedSet()
                 for soll in sollkonto:
                     if not self.is_taxline(cr, soll.id):
                         sollnotax.add(soll)
