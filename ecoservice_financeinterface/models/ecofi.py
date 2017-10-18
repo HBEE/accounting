@@ -188,7 +188,7 @@ class ecofi(osv.osv):
         elif len(sollkonto) == 1 and len(habenkonto) > 1:
             ecofikonto = first(sollkonto)
         elif len(sollkonto) > 1 and len(habenkonto) == 1:
-            ecofikonto = first(sollkonto)
+            ecofikonto = first(habenkonto)
         elif len(sollkonto) > 1 and len(habenkonto) > 1:
             if len(sollkonto) > len(habenkonto):
                 habennotax = OrderedSet()
