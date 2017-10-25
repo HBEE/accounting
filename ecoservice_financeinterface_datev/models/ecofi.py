@@ -167,9 +167,11 @@ class ecofi(orm.Model):
                 lineumsatz += Decimal(str(line.debit))
                 lineumsatz -= Decimal(str(line.credit))
                 context['waehrung'] = False
-                if line.amount_currency != 0.0:
+                if line.currency_id:
                     lineumsatz = Decimal(str(line.amount_currency))
                     context['waehrung'] = True
+                if not lineumsatz:
+                    continue
                 buschluessel = ''
                 if exportmethod == 'brutto':
                     if self.pool.get('ecofi').is_taxline(cr, line.account_id.id) and not line.ecofi_bu == 'SD':
