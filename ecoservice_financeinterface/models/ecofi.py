@@ -153,85 +153,14 @@ class ecofi(osv.osv):
         :param move: account_move
         :param context: context arguments, like lang, time zone
 
-        How the Mainaccount is calculated (tax lines are ignored):
-
-        1. Analyse the number of debit and credit lines.
-        a. 1 debit, n credit lines: Mainaccount is the debitline account
-        b. m debit, 1 credit lines: Mainaccount is the creditline account
-        c. 1 debit, 1 credit lines: Mainaccount is the firstline account
-
-        If there are m debit and n debitlines:
-        a. Test if there is an invoice connected to the move_id and test if the invoice
-            account_id is in the move than this is the mainaccount
+        The Mainaccount is always first line from the account.move
         """
-        def first(set_element):
-            return next(iter(set_element))
+        ecofikonto = move.line_id[0].account_id
 
-        context = context or dict()
-        ecofikonto = False
-        sollkonto = OrderedSet()
-        habenkonto = OrderedSet()
-        nullkonto = OrderedSet()
-        error = False
-        ecofikonto_no_invoice = move.line_id[0].account_id
-
-        for line in move.line_id:
-            Umsatz = Decimal(str(line.debit)) - Decimal(str(line.credit))
-            if Umsatz < 0:
-                habenkonto.add(line.account_id)
-            elif Umsatz > 0:
-                sollkonto.add(line.account_id)
-            else:
-                nullkonto.add(line.account_id)
-        if len(sollkonto) == 1 and len(habenkonto) == 1:
-            ecofikonto = move.line_id[0].account_id
-        elif len(sollkonto) == 1 and len(habenkonto) > 1:
-            ecofikonto = first(sollkonto)
-        elif len(sollkonto) > 1 and len(habenkonto) == 1:
-            ecofikonto = first(habenkonto)
-        elif len(sollkonto) > 1 and len(habenkonto) > 1:
-            if len(sollkonto) > len(habenkonto):
-                habennotax = OrderedSet()
-                for haben in habenkonto:
-                    if not self.is_taxline(cr, haben.id):
-                        habennotax.add(haben)
-                if len(habennotax) == 1:
-                    ecofikonto = first(habennotax)
-            elif len(sollkonto) < len(habenkonto):
-                sollnotax = OrderedSet()
-                for soll in sollkonto:
-                    if not self.is_taxline(cr, soll.id):
-                        sollnotax.add(soll)
-                if len(sollnotax) == 1:
-                    ecofikonto = first(sollnotax)
-        if not ecofikonto:
-            if context.get('invoice'):
-                invoice_ids = context['invoice'].ids
-            else:
-                invoice_ids = self.pool.get('account.invoice').search(cr, uid, [('move_id', '=', move.id)])
-            in_booking = False
-            invoice_mainaccount = False
-            if len(invoice_ids) == 1:
-                invoice_mainaccount = self.pool.get('account.invoice').browse(cr, uid, invoice_ids[0], context=context).account_id
-                for sk in sollkonto:
-                    if sk == invoice_mainaccount:
-                        in_booking = True
-                        break
-                for hk in habenkonto:
-                    if hk == invoice_mainaccount:
-                        in_booking = True
-                        break
-            if not in_booking and invoice_ids:
-                error = _(u"The main account of the booking could not be resolved, the move has %s credit- and %s debitlines!") % (len(sollkonto), len(habenkonto))
-                error += "\n"
-                ecofikonto = ecofikonto_no_invoice
-            else:
-                ecofikonto = invoice_mainaccount
-        if ecofikonto:
-            self.pool.get('account.move.line').write(cr, uid, [l.id for l in move.line_id],
-                                                     {'ecofi_account_counterpart': ecofikonto.id},
-                                                     context=context, check=False, update_check=True)
-        return error
+        self.pool.get('account.move.line').write(cr, uid, [l.id for l in move.line_id],
+                                                 {'ecofi_account_counterpart': ecofikonto.id},
+                                                 context=context, check=False, update_check=True)
+        return False
 
     def generate_csv_move_lines(self, cr, uid, move, buchungserror, errorcount, thislog, thismovename, exportmethod,
                           partnererror, buchungszeilencount, bookingdict, context=None):
