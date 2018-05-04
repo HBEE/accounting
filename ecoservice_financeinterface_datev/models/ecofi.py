@@ -265,7 +265,7 @@ class ecofi(orm.Model):
             datevdict['Kostmenge'].encode('iso-8859-1'),
             datevdict['Skonto'].encode('iso-8859-1'),
             datevdict['Buchungstext'].encode('iso-8859-1', 'ignore'),
-            datevdict['EulandUSTID'].encode('iso-8859-1'),
+            datevdict['EulandUSTID'].encode('iso-8859-1', 'ignore'),
             datevdict['EUSteuer'].encode('iso-8859-1'),
             datevdict['Basiswaehrungsbetrag'].encode('iso-8859-1'),
             datevdict['Basiswaehrungskennung'].encode('iso-8859-1'),
