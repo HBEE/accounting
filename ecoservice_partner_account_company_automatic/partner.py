@@ -30,7 +30,7 @@ class partner(osv.osv):
         """ Inherit method to create the accounts automatically for partners without parent
         """
         result = super(partner, self).create(cr, uid, vals, context=context)
-        if 'parent_id' in vals and 'is_company' in vals:
+        if 'parent_id' in vals:
             if not vals['parent_id'] or (vals['parent_id'] and vals['is_company']):
                 ctx = dict(context)
                 if 'customer' in vals and vals['customer']:
