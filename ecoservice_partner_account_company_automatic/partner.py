@@ -31,7 +31,7 @@ class partner(osv.osv):
         """
         result = super(partner, self).create(cr, uid, vals, context=context)
         if 'parent_id' in vals:
-            if not vals['parent_id'] or (vals['parent_id'] and vals['is_company']):
+            if not vals['parent_id'] or (vals['parent_id'] and vals.get('is_company')):
                 ctx = dict(context)
                 if 'customer' in vals and vals['customer']:
                     ctx['type'] = 'receivable'
