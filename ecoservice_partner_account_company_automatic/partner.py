@@ -23,19 +23,19 @@
 from openerp.osv import osv
 
 
-class partner(osv.osv):
+class ResPartner(osv.osv):
     _inherit = 'res.partner'
 
     def create(self, cr, uid, vals, context=None):
         """ Inherit method to create the accounts automatically for partners without parent
         """
-        result = super(partner, self).create(cr, uid, vals, context=context)
+        result = super(ResPartner, self).create(cr, uid, vals, context=context)
         ctx = dict(context)
-        if 'customer' in vals and vals['customer']:
+        partner = self.browse(cr, uid, result, context=context)
+        if partner.customer:
             ctx['type'] = 'receivable'
             self.create_accounts(cr, uid, [result], context=ctx)
-        if 'supplier' in vals and vals['supplier']:
+        if partner.supplier:
             ctx['type'] = 'payable'
             self.create_accounts(cr, uid, [result], context=ctx)
         return result
-partner()
