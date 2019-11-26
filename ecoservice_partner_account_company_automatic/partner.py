@@ -30,14 +30,12 @@ class partner(osv.osv):
         """ Inherit method to create the accounts automatically for partners without parent
         """
         result = super(partner, self).create(cr, uid, vals, context=context)
-        if 'parent_id' in vals:
-            if not vals['parent_id'] or (vals['parent_id'] and vals.get('is_company')):
-                ctx = dict(context)
-                if 'customer' in vals and vals['customer']:
-                    ctx['type'] = 'receivable'
-                    self.create_accounts(cr, uid, [result], context=ctx)
-                if 'supplier' in vals and vals['supplier']:
-                    ctx['type'] = 'payable'
-                    self.create_accounts(cr, uid, [result], context=ctx)
+        ctx = dict(context)
+        if 'customer' in vals and vals['customer']:
+            ctx['type'] = 'receivable'
+            self.create_accounts(cr, uid, [result], context=ctx)
+        if 'supplier' in vals and vals['supplier']:
+            ctx['type'] = 'payable'
+            self.create_accounts(cr, uid, [result], context=ctx)
         return result
 partner()
